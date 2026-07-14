@@ -1,0 +1,14 @@
+query Dashboard($organizationId: uuid!) {
+  firs(where: { organization_id: { _eq: $organizationId } }, limit: 5, order_by: { updated_at: desc }) {
+    id
+    internal_number
+    status
+    updated_at
+  }
+  notifications(where: { organization_id: { _eq: $organizationId }, read_at: { _is_null: true } }, limit: 10) {
+    id
+    severity
+    title
+    message
+  }
+}

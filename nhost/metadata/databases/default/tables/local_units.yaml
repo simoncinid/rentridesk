@@ -1,0 +1,8 @@
+table: { schema: public, name: local_units }
+object_relationships: [{ name: organization, using: { foreign_key_constraint_on: organization_id } }]
+select_permissions: &tenant_read
+  - role: user
+    permission: { columns: "*", filter: { organization: { memberships: { user_id: { _eq: X-Hasura-User-Id }, status: { _eq: active } } } } }
+insert_permissions:
+  - role: user
+    permission: { check: { organization: { memberships: { user_id: { _eq: X-Hasura-User-Id }, status: { _eq: active }, role: { _in: [owner,admin] } } } }, columns: [organization_id,name,internal_code,activity_type,address_line_1,address_line_2,postal_code,city,province,country_code,phone,email,is_headquarters,active] }

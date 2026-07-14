@@ -1,0 +1,5 @@
+table: { schema: public, name: registers }
+object_relationships: [{ name: organization, using: { foreign_key_constraint_on: organization_id } }]
+select_permissions:
+  - role: user
+    permission: { columns: [id,organization_id,local_unit_id,name,register_type,rentri_register_reference,official_number,status,opened_at,closed_at,last_local_sequence,last_transmitted_sequence,last_transmission_at,created_at,updated_at], filter: { organization: { memberships: { user_id: { _eq: X-Hasura-User-Id }, status: { _eq: active } } } } }

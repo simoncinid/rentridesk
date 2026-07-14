@@ -1,0 +1,8 @@
+table: { schema: public, name: register_entries }
+object_relationships: [{ name: organization, using: { foreign_key_constraint_on: organization_id } }]
+select_permissions:
+  - role: user
+    permission: { columns: "*", filter: { organization: { memberships: { user_id: { _eq: X-Hasura-User-Id }, status: { _eq: active } } } } }
+insert_permissions:
+  - role: user
+    permission: { check: { status: { _eq: draft }, organization: { memberships: { user_id: { _eq: X-Hasura-User-Id }, status: { _eq: active }, role: { _in: [owner,admin,environmental_manager,operator,consultant] } } } }, columns: [organization_id,local_unit_id,register_id,entry_type,local_sequence,operation_date,registration_date,waste_profile_id,eer_code_snapshot,waste_description_snapshot,is_hazardous_snapshot,physical_state_code_snapshot,quantity,quantity_unit_code,recovery_disposal_code,notes,status] }

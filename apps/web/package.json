@@ -1,0 +1,38 @@
+{
+  "name": "@rentridesk/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
+    "check:seo": "node scripts/check-seo.mjs",
+    "typecheck": "tsc -b --pretty false"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "latest",
+    "@nhost/nhost-js": "latest",
+    "@radix-ui/react-dialog": "latest",
+    "@radix-ui/react-dropdown-menu": "latest",
+    "@rentridesk/contracts": "workspace:*",
+    "@tanstack/react-query": "latest",
+    "@tanstack/react-table": "latest",
+    "date-fns": "latest",
+    "lucide-react": "latest",
+    "nodemailer": "^9.0.3",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-hook-form": "latest",
+    "react-router-dom": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^8.0.1",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@vercel/node": "^5.8.23",
+    "@vitejs/plugin-react": "latest",
+    "typescript": "6.0.3",
+    "vite": "latest"
+  }
+}

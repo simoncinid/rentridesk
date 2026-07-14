@@ -1,0 +1,9 @@
+table: { schema: public, name: organization_memberships }
+object_relationships:
+  - name: organization
+    using: { foreign_key_constraint_on: organization_id }
+select_permissions:
+  - role: user
+    permission:
+      columns: [id,organization_id,user_id,role,status,invited_email,invited_at,accepted_at,created_at,updated_at]
+      filter: { organization: { memberships: { user_id: { _eq: X-Hasura-User-Id }, status: { _eq: active } } } }

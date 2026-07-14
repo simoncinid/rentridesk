@@ -1,0 +1,12 @@
+node_modules
+dist
+dist-ssr
+coverage
+.env
+.env.local
+playwright-report
+test-results
+*.tsbuildinfo
+.DS_Store
+nhost/.nhost
+docs/rentri/update-report.json

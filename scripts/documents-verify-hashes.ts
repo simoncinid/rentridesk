@@ -1,0 +1,1 @@
+console.log(JSON.stringify({ status: process.env['DATABASE_URL'] ? 'database_job_required' : 'skipped', message: process.env['DATABASE_URL'] ? 'Invocare POST /v1/jobs/run-once con job verify_document_hashes.' : 'DATABASE_URL non configurato; nessun documento letto.' }, null, 2));

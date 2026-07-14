@@ -1,0 +1,8 @@
+table: { schema: public, name: parties }
+object_relationships: [{ name: organization, using: { foreign_key_constraint_on: organization_id } }]
+select_permissions:
+  - role: user
+    permission: { columns: "*", filter: { organization: { memberships: { user_id: { _eq: X-Hasura-User-Id }, status: { _eq: active } } } } }
+insert_permissions:
+  - role: user
+    permission: { check: { organization: { memberships: { user_id: { _eq: X-Hasura-User-Id }, status: { _eq: active }, role: { _neq: viewer } } } }, columns: [organization_id,legal_name,tax_code,vat_number,rentri_reference,register_reference,certified_email,email,phone,address_line_1,postal_code,city,province,country_code,notes,active] }

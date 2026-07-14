@@ -1,0 +1,30 @@
+[project]
+name = "rentridesk"
+
+[postgres]
+version = "16"
+
+[hasura]
+version = "v2.48.5"
+adminSecret = "nhost-admin-secret-local-only"
+
+[auth]
+version = "0.39.0"
+clientUrl = "http://localhost:5173"
+
+[auth.email]
+signinMethod = "password"
+emailVerificationRequired = true
+
+[auth.mfa]
+enabled = true
+
+[storage]
+version = "0.6.1"
+
+[functions]
+nodeVersion = 22
+
+[global.environment]
+APP_ENV = "development"
+RENTRI_ENVIRONMENT = "mock"

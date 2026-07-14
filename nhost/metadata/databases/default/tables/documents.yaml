@@ -1,0 +1,5 @@
+table: { schema: public, name: documents }
+object_relationships: [{ name: organization, using: { foreign_key_constraint_on: organization_id } }]
+select_permissions:
+  - role: user
+    permission: { columns: [id,organization_id,local_unit_id,storage_file_id,bucket_id,document_type,file_name,mime_type,size_bytes,sha256,source,status,legal_lock,retention_until,uploaded_by,uploaded_at,created_at,updated_at], filter: { organization: { memberships: { user_id: { _eq: X-Hasura-User-Id }, status: { _eq: active } } } } }

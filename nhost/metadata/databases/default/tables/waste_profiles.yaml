@@ -1,0 +1,8 @@
+table: { schema: public, name: waste_profiles }
+object_relationships: [{ name: organization, using: { foreign_key_constraint_on: organization_id } }]
+select_permissions:
+  - role: user
+    permission: { columns: "*", filter: { organization: { memberships: { user_id: { _eq: X-Hasura-User-Id }, status: { _eq: active } } } } }
+insert_permissions:
+  - role: user
+    permission: { check: { organization: { memberships: { user_id: { _eq: X-Hasura-User-Id }, status: { _eq: active }, role: { _in: [owner,admin,environmental_manager,consultant] } } } }, columns: [organization_id,local_unit_id,name,internal_code,eer_code,description,producer_description,physical_state_code,quantity_unit_code,is_hazardous,classification_status,classification_notes,default_packaging_type_code,default_recovery_disposal_code,default_carrier_party_id,default_destination_party_id,default_intermediary_party_id,default_notes,active] }

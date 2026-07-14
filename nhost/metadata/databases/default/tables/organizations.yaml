@@ -1,0 +1,11 @@
+table: { schema: public, name: organizations }
+array_relationships:
+  - name: memberships
+    using: { foreign_key_constraint_on: { column: organization_id, table: { schema: public, name: organization_memberships } } }
+select_permissions:
+  - role: user
+    permission:
+      columns: [id,type,legal_name,trade_name,email,phone,city,province,status,subscription_status,onboarding_status,default_timezone,rentri_operator_reference,is_demo,created_at,updated_at]
+      filter: { memberships: { user_id: { _eq: X-Hasura-User-Id }, status: { _eq: active } } }
+  - role: platform_admin
+    permission: { columns: "*", filter: {} }

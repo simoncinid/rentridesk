@@ -1,0 +1,8 @@
+table: { schema: public, name: firs }
+object_relationships: [{ name: organization, using: { foreign_key_constraint_on: organization_id } }]
+select_permissions:
+  - role: user
+    permission: { columns: [id,organization_id,local_unit_id,register_id,internal_number,rentri_fir_number,rentri_reference,environment,status,producer_party_snapshot,carrier_party_snapshot,destination_party_snapshot,intermediary_party_snapshot,waste_profile_id,departure_planned_at,departure_at,arrival_at,quantity_at_departure,quantity_unit_code,quantity_at_destination,destination_outcome,recovery_disposal_code,vehicle_registration,trailer_registration,driver_name,route_notes,general_notes,current_version,validation_status,signature_status,copy_status,transmission_status,conservation_status,created_at,updated_at,version], filter: { organization: { memberships: { user_id: { _eq: X-Hasura-User-Id }, status: { _eq: active } } } } }
+insert_permissions:
+  - role: user
+    permission: { check: { status: { _eq: draft }, organization: { memberships: { user_id: { _eq: X-Hasura-User-Id }, status: { _eq: active }, role: { _in: [owner,admin,environmental_manager,operator,consultant] } } } }, columns: [organization_id,local_unit_id,register_id,internal_number,environment,status,producer_party_snapshot,carrier_party_snapshot,destination_party_snapshot,intermediary_party_snapshot,waste_profile_id,departure_planned_at,quantity_at_departure,quantity_unit_code,recovery_disposal_code,route_notes,general_notes] }

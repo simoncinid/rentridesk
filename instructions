@@ -1,0 +1,4494 @@
+Agisci come lead software architect, senior full-stack engineer, database architect, security engineer e specialista di integrazioni con servizi pubblici italiani.
+
+Devi realizzare l’intero repository di una piattaforma SaaS chiamata provvisoriamente “rentridesk”.
+
+La piattaforma serve officine meccaniche, carrozzerie, elettrauto e piccole attività di autoriparazione italiane che devono gestire rifiuti, registro cronologico di carico e scarico, formulari FIR digitali e interoperabilità con RENTRI.
+
+Non limitarti a produrre un piano, una demo statica o pseudocodice.
+
+Devi generare codice funzionante, schema database, migrazioni, metadata Hasura, permessi, backend, frontend, integrazioni, verifiche automatiche, dati dimostrativi, documentazione e istruzioni di avvio.
+
+Procedi in autonomia. Non chiedere conferme per decisioni tecniche ordinarie. Quando una scelta dipende da credenziali, certificati o documenti ufficiali non presenti nel repository, predisponi l’interfaccia, il mock, la configurazione e un punto di integrazione ben documentato.
+
+Non simulare come funzionante ciò che richiede accreditamento o credenziali RENTRI reali.
+
+1. OBIETTIVO DEL PRODOTTO
+
+rentridesk deve ridurre il tempo necessario a una piccola officina per:
+
+registrare la produzione di un rifiuto
+
+controllare le giacenze
+
+preparare uno scarico
+
+predisporre un FIR digitale
+
+interagire con RENTRI
+
+seguire lo stato del FIR
+
+ricevere la copia completa
+
+collegare il FIR ai movimenti del registro
+
+conservare i documenti
+
+controllare errori, scadenze e dati mancanti
+
+La piattaforma deve risultare comprensibile anche a un titolare senza preparazione informatica.
+
+Il prodotto non deve sostituire il gestionale di officina, la contabilità o il magazzino ricambi.
+
+Il prodotto deve occuparsi del processo rifiuti.
+
+2. LIMITI DELLA PRIMA VERSIONE
+
+La prima versione riguarda il produttore o detentore del rifiuto.
+
+Deve gestire trasportatori, destinatari e intermediari come soggetti esterni.
+
+Non deve offrire un gestionale completo per trasportatori professionali o impianti di trattamento.
+
+Non deve implementare autonomamente algoritmi crittografici di firma XAdES.
+
+Non deve emettere certificati.
+
+Non deve affermare che una classificazione EER sia corretta senza conferma del cliente o del consulente.
+
+Non deve fornire consulenza legale.
+
+Non deve eliminare documenti firmati, trasmessi o sottoposti a conservazione.
+
+Non deve inviare richieste reali all’ambiente RENTRI di produzione durante lo sviluppo.
+
+3. FRONTEND E STILE VISIVO
+
+Realizza una web application desktop-first.
+
+Il frontend deve funzionare bene a partire da una larghezza di 1280 pixel.
+
+Le funzioni essenziali devono restare accessibili da tablet.
+
+Non realizzare una app mobile nativa nella prima versione.
+
+Non scegliere uno stile grafico definitivo.
+
+Non definire:
+
+colori di brand
+
+logo definitivo
+
+font di brand
+
+tema visivo
+
+ombre decorative
+
+gradienti
+
+illustrazioni
+
+animazioni decorative
+
+identità grafica
+
+stile delle icone
+
+Predisponi componenti semantici, accessibili e facili da personalizzare.
+
+Applica CSS minimo per:
+
+layout funzionante
+
+leggibilità
+
+gestione delle tabelle
+
+modali
+
+form
+
+stati di errore
+
+navigazione da tastiera
+
+visualizzazione su desktop
+
+Lascia nomi di classi chiari e CSS variables neutrali.
+
+Non introdurre un design system invasivo.
+
+Non usare componenti che rendano difficile la futura sostituzione dello stile.
+
+4. STACK TECNOLOGICO
+
+Usa questo stack.
+
+Frontend:
+
+React
+
+TypeScript in modalità strict
+
+Vite
+
+TanStack Router oppure React Router, scegli la soluzione più stabile al momento dell’esecuzione
+
+TanStack Query
+
+React Hook Form
+
+Zod
+
+Nhost JavaScript SDK
+
+GraphQL Code Generator
+
+date-fns
+
+una libreria leggera per tabelle con ordinamento, filtri e paginazione
+
+una libreria accessibile e non stilizzata per dialog, menu, tooltip e combobox, quando serve
+
+Backend:
+
+Nhost Cloud
+
+PostgreSQL Nhost
+
+Hasura GraphQL
+
+Nhost Auth
+
+Nhost Storage
+
+Nhost Events
+
+Nhost Cron Triggers
+
+Nhost Run Service per il bridge RENTRI e le operazioni server-side
+
+Node.js LTS
+
+TypeScript strict
+
+Fastify
+
+Zod
+
+OpenAPI generata dal backend interno
+
+Pino per log strutturati
+
+XML builder e parser affidabili
+
+validazione XML tramite libxml2 o strumento equivalente incluso nel container
+
+Package manager:
+
+pnpm
+
+Repository:
+
+monorepo pnpm workspaces
+
+Turborepo, se porta un vantaggio reale
+
+Qualità:
+
+ESLint
+
+Prettier
+
+Vitest
+
+Playwright
+
+GraphQL Code Generator
+
+Husky e lint-staged, se non complicano l’avvio
+
+CI con GitHub Actions
+
+Scegli versioni stabili correnti al momento dell’esecuzione.
+
+Registra le versioni nel lockfile.
+
+Non dipendere da versioni beta.
+
+5. ARCHITETTURA GENERALE
+
+La piattaforma deve avere questi blocchi.
+
+5.1 Frontend web
+
+Gestisce:
+
+autenticazione
+
+onboarding
+
+dashboard
+
+registro
+
+movimenti
+
+FIR
+
+anagrafiche
+
+rifiuti configurati
+
+documenti
+
+avvisi
+
+utenti
+
+impostazioni
+
+connessione RENTRI
+
+partner
+
+amministrazione SaaS
+
+Il browser comunica con Hasura per le letture consentite.
+
+Le operazioni giuridicamente o tecnicamente sensibili devono passare dal Run Service.
+
+Esempi di operazioni sensibili:
+
+apertura di un registro
+
+numerazione o vidimazione
+
+trasmissione di movimenti
+
+predisposizione definitiva di un FIR
+
+invio a RENTRI
+
+modifica dello stato ufficiale
+
+importazione della copia completa
+
+annullamento
+
+rettifica
+
+gestione dei certificati
+
+gestione delle credenziali di interoperabilità
+
+5.2 Nhost PostgreSQL e Hasura
+
+PostgreSQL conserva il dominio applicativo.
+
+Hasura espone le query GraphQL.
+
+I permessi Hasura devono seguire il principio deny-by-default.
+
+Ogni tabella deve avere permessi espliciti.
+
+Non esporre mutation dirette su tabelle critiche.
+
+5.3 Nhost Auth
+
+Gestisce:
+
+registrazione
+
+accesso
+
+verifica e-mail
+
+recupero password
+
+sessioni
+
+MFA TOTP
+
+eventuale WebAuthn
+
+Gli utenti privilegiati devono attivare MFA.
+
+5.4 Nhost Storage
+
+Gestisce:
+
+FIR e xFIR
+
+copie complete
+
+documenti di autorizzazione
+
+analisi
+
+allegati
+
+esportazioni
+
+documenti da mandare in conservazione
+
+Non rendere pubblico alcun bucket contenente documenti aziendali.
+
+5.5 RENTRI Bridge
+
+Realizza un servizio Fastify distribuito come Nhost Run Service.
+
+Il servizio deve:
+
+verificare il JWT Nhost
+
+controllare l’appartenenza all’organizzazione
+
+controllare il ruolo applicativo
+
+eseguire operazioni atomiche sul database
+
+dialogare con RENTRI
+
+gestire certificati e credenziali
+
+gestire retry e idempotenza
+
+registrare richieste e risposte
+
+oscurare dati sensibili nei log
+
+validare XML e JSON
+
+gestire l’ambiente demo e quello di produzione
+
+esporre endpoint interni documentati con OpenAPI
+
+Non mettere NHOST_ADMIN_SECRET nel browser.
+
+Non mettere certificati RENTRI nel browser.
+
+Non chiamare RENTRI direttamente dal frontend.
+
+6. STRUTTURA DEL REPOSITORY
+
+Predisponi questa struttura o una struttura equivalente più ordinata.
+
+apps/
+web/
+src/
+app/
+routes/
+features/
+components/
+forms/
+graphql/
+hooks/
+lib/
+auth/
+permissions/
+validation/
+types/
+assets/
+styles/
+public/
+index.html
+vite.config.ts
+
+services/
+rentri-bridge/
+src/
+server.ts
+app.ts
+config/
+auth/
+authorization/
+routes/
+modules/
+organizations/
+local-units/
+waste/
+registers/
+movements/
+fir/
+rentri/
+documents/
+notifications/
+billing/
+imports/
+audit/
+rentri/
+client/
+adapters/
+schemas/
+mappers/
+credentials/
+idempotency/
+fixtures/
+jobs/
+events/
+xml/
+storage/
+database/
+logging/
+errors/
+Dockerfile
+nhost-run-service.toml
+
+packages/
+domain/
+contracts/
+shared/
+graphql/
+config/
+validation/
+
+nhost/
+migrations/
+metadata/
+seeds/
+emails/
+functions/
+nhost.toml
+
+docs/
+architecture/
+rentri/
+database/
+permissions/
+operations/
+security/
+decisions/
+
+.github/
+workflows/
+
+Inserisci anche:
+
+README.md
+
+.env.example
+
+.secrets.example
+
+CONTRIBUTING.md
+
+SECURITY.md
+
+CHANGELOG.md
+
+DECISIONS.md
+
+IMPLEMENTATION_STATUS.md
+
+7. REGOLE DI CODICE
+
+Usa TypeScript strict.
+
+Non usare any salvo integrazioni esterne prive di tipi. In quel caso valida subito il valore unknown con Zod.
+
+Non duplicare tipi tra frontend e backend.
+
+Inserisci nel package contracts gli schemi condivisi.
+
+Usa nomi di dominio in inglese nel codice.
+
+Usa testi italiani nell’interfaccia.
+
+Mantieni separate:
+
+logica di dominio
+
+logica applicativa
+
+accesso ai dati
+
+integrazioni esterne
+
+componenti frontend
+
+Non inserire logica RENTRI nei componenti React.
+
+Non inserire query SQL sparse nel codice.
+
+Raccogli le query server-side in repository o moduli dedicati.
+
+Ogni endpoint deve avere:
+
+schema input
+
+schema output
+
+controllo autenticazione
+
+controllo autorizzazione
+
+gestione degli errori
+
+correlation ID
+
+idempotency key quando necessaria
+
+log strutturato
+
+8. MULTI-TENANCY
+
+La piattaforma è multi-tenant.
+
+Ogni azienda è una organization.
+
+Ogni dato aziendale deve contenere organization_id direttamente o derivarlo da una relazione non ambigua.
+
+Un utente riesce ad appartenere a più organizzazioni.
+
+Un consulente riesce ad accedere a più clienti.
+
+Un partner riesce ad amministrare i clienti che gli hanno assegnato accesso.
+
+Non usare un ruolo Nhost diverso per ogni ruolo aziendale.
+
+Usa:
+
+ruoli Nhost globali minimi
+
+membership nel database
+
+permessi Hasura basati sulle relazioni
+
+controlli applicativi nel Run Service
+
+Ruoli globali Nhost:
+
+user
+
+platform_admin
+
+service
+
+Ruoli applicativi nell’organizzazione:
+
+owner
+
+admin
+
+environmental_manager
+
+operator
+
+consultant
+
+viewer
+
+billing_manager
+
+partner_admin
+
+Il ruolo platform_admin è globale.
+
+Tutti gli altri ruoli sono legati a organization_memberships.
+
+9. MODELLO DATI
+
+Genera migrazioni SQL complete.
+
+Usa UUID generati dal database.
+
+Usa timestamptz.
+
+Conserva i timestamp in UTC.
+
+Mostra date e orari con timezone Europe/Rome.
+
+Usa numeric, non float, per quantità e importi.
+
+Aggiungi created_at e updated_at dove appropriato.
+
+Aggiungi created_by e updated_by nelle entità importanti.
+
+Aggiungi indici sulle foreign key e sui filtri frequenti.
+
+Aggiungi vincoli univoci.
+
+Aggiungi check constraints.
+
+Aggiungi commenti SQL alle tabelle critiche.
+
+9.1 Profili utente
+
+Tabella user_profiles:
+
+user_id
+
+first_name
+
+last_name
+
+phone
+
+preferred_locale
+
+timezone
+
+mfa_required
+
+last_active_organization_id
+
+accepted_terms_at
+
+accepted_privacy_at
+
+created_at
+
+updated_at
+
+Collega user_profiles ad auth.users.
+
+9.2 Organizzazioni
+
+Tabella organizations:
+
+id
+
+type
+
+legal_name
+
+trade_name
+
+tax_code
+
+vat_number
+
+rea_number
+
+ateco_code
+
+certified_email
+
+email
+
+phone
+
+website
+
+country_code
+
+address_line_1
+
+address_line_2
+
+postal_code
+
+city
+
+province
+
+status
+
+subscription_status
+
+onboarding_status
+
+default_timezone
+
+rentri_operator_reference
+
+is_demo
+
+created_at
+
+updated_at
+
+organization type:
+
+customer
+
+partner
+
+consultancy
+
+internal
+
+status:
+
+draft
+
+active
+
+suspended
+
+closed
+
+9.3 Appartenenze
+
+Tabella organization_memberships:
+
+id
+
+organization_id
+
+user_id
+
+role
+
+status
+
+invited_email
+
+invited_by
+
+invited_at
+
+accepted_at
+
+revoked_at
+
+created_at
+
+updated_at
+
+Vincolo univoco organization_id più user_id.
+
+9.4 Collegamenti partner-cliente
+
+Tabella partner_client_relationships:
+
+id
+
+partner_organization_id
+
+client_organization_id
+
+relationship_type
+
+status
+
+permissions_json
+
+starts_at
+
+ends_at
+
+created_by
+
+created_at
+
+updated_at
+
+Il cliente deve autorizzare il collegamento.
+
+Il partner non deve ottenere accesso per il semplice fatto di aver inserito un cliente.
+
+9.5 Unità locali
+
+Tabella local_units:
+
+id
+
+organization_id
+
+name
+
+internal_code
+
+rentri_unit_reference
+
+activity_type
+
+address_line_1
+
+address_line_2
+
+postal_code
+
+city
+
+province
+
+country_code
+
+latitude
+
+longitude
+
+phone
+
+email
+
+is_headquarters
+
+rentri_registration_status
+
+rentri_registration_date
+
+active
+
+created_at
+
+updated_at
+
+9.6 Connessioni RENTRI
+
+Tabella rentri_connections:
+
+id
+
+organization_id
+
+local_unit_id nullable
+
+environment
+
+status
+
+authentication_mode
+
+rentri_operator_reference
+
+rentri_unit_reference
+
+credential_reference
+
+certificate_serial_number
+
+certificate_expires_at
+
+last_successful_connection_at
+
+last_failed_connection_at
+
+last_error_code
+
+last_error_message
+
+configuration_json
+
+created_at
+
+updated_at
+
+Non conservare chiavi private in chiaro.
+
+9.7 Credenziali cifrate
+
+Tabella encrypted_credentials:
+
+id
+
+organization_id
+
+credential_type
+
+provider
+
+encrypted_payload
+
+encryption_version
+
+key_reference
+
+fingerprint
+
+expires_at
+
+status
+
+created_by
+
+created_at
+
+rotated_at
+
+revoked_at
+
+L’accesso deve avvenire dal Run Service.
+
+Hasura non deve esporre encrypted_payload.
+
+Realizza envelope encryption.
+
+La master key arriva da Nhost Secret.
+
+Ogni record ha una data encryption key distinta.
+
+Predisponi un’interfaccia KeyManagementProvider.
+
+Fornisci:
+
+LocalEnvelopeEncryptionProvider per sviluppo
+
+EnvironmentMasterKeyProvider per prima distribuzione
+
+interfaccia pronta per un KMS esterno
+
+9.8 Tabelle di codifica RENTRI
+
+Predisponi tabelle locali versionate:
+
+ref_eer_codes
+
+ref_hazard_properties
+
+ref_physical_states
+
+ref_quantity_units
+
+ref_packaging_types
+
+ref_recovery_disposal_operations
+
+ref_transport_modes
+
+ref_countries
+
+ref_rentri_enums
+
+Ogni tabella di riferimento deve avere:
+
+code
+
+label_it
+
+description_it
+
+valid_from
+
+valid_to
+
+active
+
+source_version
+
+source_hash
+
+synced_at
+
+raw_payload JSONB
+
+Non hardcodare le codifiche nel frontend.
+
+Predisponi una sincronizzazione automatica dalle API ufficiali.
+
+Mantieni uno snapshot storico.
+
+Non eliminare codici non più attivi già collegati a documenti storici.
+
+9.9 Profili rifiuto
+
+Tabella waste_profiles:
+
+id
+
+organization_id
+
+local_unit_id
+
+name
+
+internal_code
+
+eer_code
+
+description
+
+producer_description
+
+physical_state_code
+
+quantity_unit_code
+
+is_hazardous
+
+classification_status
+
+classification_confirmed_by
+
+classification_confirmed_at
+
+classification_notes
+
+default_packaging_type_code
+
+default_recovery_disposal_code
+
+default_carrier_party_id
+
+default_destination_party_id
+
+default_intermediary_party_id
+
+default_notes
+
+active
+
+created_at
+
+updated_at
+
+classification_status:
+
+draft
+
+suggested
+
+confirmed
+
+needs_review
+
+expired_review
+
+Tabella waste_profile_hazard_properties:
+
+waste_profile_id
+
+hazard_property_code
+
+Tabella waste_profile_documents:
+
+waste_profile_id
+
+document_id
+
+document_role
+
+Esempi di categorie da mostrare nell’onboarding, senza assegnare automaticamente un codice definitivo:
+
+oli usati
+
+filtri olio
+
+liquidi freni
+
+liquidi refrigeranti
+
+batterie
+
+assorbenti contaminati
+
+imballaggi contaminati
+
+solventi
+
+residui di vernice
+
+fanghi
+
+pneumatici
+
+componenti metallici
+
+rifiuti elettronici
+
+La piattaforma deve proporre una configurazione iniziale.
+
+Il cliente o il consulente deve confermarla.
+
+10. SOGGETTI ESTERNI
+
+Tabella parties:
+
+id
+
+organization_id
+
+party_type
+
+legal_name
+
+tax_code
+
+vat_number
+
+rentri_reference
+
+register_reference
+
+certified_email
+
+email
+
+phone
+
+address_line_1
+
+postal_code
+
+city
+
+province
+
+country_code
+
+notes
+
+active
+
+created_at
+
+updated_at
+
+party_type deve supportare più ruoli:
+
+carrier
+
+destination
+
+intermediary
+
+laboratory
+
+consultant
+
+supplier
+
+Tabella party_roles separata, se un soggetto ricopre più ruoli.
+
+Tabella party_authorizations:
+
+id
+
+organization_id
+
+party_id
+
+authorization_type
+
+authorization_number
+
+issuing_authority
+
+valid_from
+
+expires_at
+
+status
+
+covered_eer_codes JSONB o tabella relazionale
+
+document_id
+
+verification_source
+
+verified_at
+
+verified_by
+
+notes
+
+created_at
+
+updated_at
+
+Il sistema deve avvisare quando:
+
+un’autorizzazione è scaduta
+
+la scadenza è vicina
+
+manca il documento
+
+il codice EER non risulta tra quelli configurati
+
+Non presentare il controllo come garanzia legale.
+
+11. DOCUMENTI E STORAGE
+
+Tabella documents:
+
+id
+
+organization_id
+
+local_unit_id nullable
+
+storage_file_id
+
+bucket_id
+
+document_type
+
+file_name
+
+mime_type
+
+size_bytes
+
+sha256
+
+source
+
+status
+
+legal_lock
+
+retention_until
+
+uploaded_by
+
+uploaded_at
+
+created_at
+
+updated_at
+
+document_type:
+
+authorization
+
+analysis
+
+register
+
+movement_export
+
+fir
+
+xfir
+
+complete_fir_copy
+
+conservation_receipt
+
+invoice
+
+contract
+
+import_file
+
+other
+
+Tabella document_links:
+
+id
+
+document_id
+
+entity_type
+
+entity_id
+
+relationship_type
+
+created_at
+
+Bucket Nhost:
+
+organization-documents
+
+rentri-payloads
+
+exports
+
+temporary-imports
+
+support-attachments
+
+Configura permessi Storage basati su organization_id.
+
+Non affidarti al nome del file per il controllo degli accessi.
+
+Collega ogni file a un record applicativo.
+
+Usa URL firmati a scadenza breve.
+
+Calcola SHA-256 al caricamento.
+
+Blocca la sostituzione dei documenti con legal_lock true.
+
+12. REGISTRI
+
+Tabella registers:
+
+id
+
+organization_id
+
+local_unit_id
+
+name
+
+register_type
+
+rentri_register_reference
+
+official_number
+
+status
+
+opened_at
+
+closed_at
+
+last_local_sequence
+
+last_transmitted_sequence
+
+last_transmission_at
+
+configuration_json
+
+created_by
+
+created_at
+
+updated_at
+
+status:
+
+draft
+
+opening_pending
+
+open
+
+suspended
+
+closed
+
+error
+
+Tabella register_entries:
+
+id
+
+organization_id
+
+local_unit_id
+
+register_id
+
+entry_type
+
+local_sequence
+
+official_sequence
+
+operation_date
+
+registration_date
+
+waste_profile_id
+
+eer_code_snapshot
+
+waste_description_snapshot
+
+is_hazardous_snapshot
+
+physical_state_code_snapshot
+
+quantity
+
+quantity_unit_code
+
+recovery_disposal_code
+
+source_type
+
+source_id
+
+status
+
+rentri_status
+
+rentri_reference
+
+transmission_status
+
+transmitted_at
+
+notes
+
+previous_entry_id nullable
+
+correction_of_entry_id nullable
+
+created_by
+
+created_at
+
+updated_at
+
+entry_type:
+
+load
+
+unload
+
+correction
+
+cancellation
+
+status:
+
+draft
+
+validated
+
+locked
+
+corrected
+
+cancelled
+
+Tabella register_entry_links:
+
+id
+
+organization_id
+
+from_entry_id
+
+to_entry_id
+
+quantity
+
+link_type
+
+created_at
+
+Uno scarico deve collegarsi a uno o più carichi.
+
+La somma scaricata non deve superare la giacenza disponibile salvo procedura di correzione esplicita.
+
+Non modificare direttamente un movimento locked.
+
+Genera una rettifica o un nuovo movimento collegato.
+
+13. CALCOLO DELLE GIACENZE
+
+Realizza una vista SQL o una materialized view per calcolare la giacenza per:
+
+organizzazione
+
+unità locale
+
+registro
+
+profilo rifiuto
+
+codice EER
+
+unità di misura
+
+Calcolo:
+
+totale carichi validi meno totale scarichi validi
+
+Escludi:
+
+bozze
+
+annullamenti
+
+movimenti sostituiti da rettifica, secondo la logica di dominio
+
+Mostra:
+
+giacenza disponibile
+
+ultimo carico
+
+ultimo scarico
+
+quantità in FIR non ancora chiusi
+
+anomalie
+
+Non sommare quantità espresse in unità diverse senza una conversione configurata e confermata.
+
+14. FORMULARI FIR
+
+Tabella firs:
+
+id
+
+organization_id
+
+local_unit_id
+
+register_id nullable
+
+internal_number
+
+rentri_fir_number
+
+rentri_reference
+
+environment
+
+status
+
+producer_party_snapshot JSONB
+
+carrier_party_snapshot JSONB
+
+destination_party_snapshot JSONB
+
+intermediary_party_snapshot JSONB nullable
+
+waste_profile_id
+
+departure_planned_at
+
+departure_at
+
+arrival_at
+
+quantity_at_departure
+
+quantity_unit_code
+
+quantity_at_destination
+
+destination_outcome
+
+recovery_disposal_code
+
+vehicle_registration
+
+trailer_registration
+
+driver_name
+
+route_notes
+
+general_notes
+
+current_version
+
+validation_status
+
+signature_status
+
+copy_status
+
+transmission_status
+
+conservation_status
+
+created_by
+
+created_at
+
+updated_at
+
+Tabella fir_versions:
+
+id
+
+organization_id
+
+fir_id
+
+version_number
+
+source
+
+status
+
+json_payload
+
+xml_document_id nullable
+
+xfir_document_id nullable
+
+schema_version
+
+payload_hash
+
+created_by
+
+created_at
+
+Tabella fir_signatures:
+
+id
+
+organization_id
+
+fir_id
+
+fir_version_id
+
+signer_role
+
+signer_party_reference
+
+signature_provider
+
+signature_type
+
+certificate_serial_number
+
+signature_timestamp
+
+signature_status
+
+signature_metadata JSONB
+
+signed_document_id
+
+created_at
+
+signer_role:
+
+producer
+
+carrier
+
+destination
+
+intermediary
+
+Tabella fir_events:
+
+id
+
+organization_id
+
+fir_id
+
+event_type
+
+actor_type
+
+actor_user_id nullable
+
+actor_party_reference nullable
+
+previous_status
+
+new_status
+
+event_timestamp
+
+source
+
+details JSONB
+
+correlation_id
+
+created_at
+
+Tabella fir_submissions:
+
+id
+
+organization_id
+
+fir_id
+
+submission_type
+
+environment
+
+idempotency_key
+
+request_reference
+
+status
+
+attempt_count
+
+next_attempt_at
+
+last_attempt_at
+
+response_code
+
+response_reference
+
+error_code
+
+error_message
+
+created_at
+
+updated_at
+
+15. MACCHINA A STATI FIR
+
+Realizza una macchina a stati esplicita.
+
+Non distribuire condizioni if sparse nel codice.
+
+Predisponi una tabella o una definizione centralizzata delle transizioni.
+
+Stati interni iniziali:
+
+draft
+
+validation_failed
+
+ready_for_numbering
+
+numbering_pending
+
+numbered
+
+ready_for_producer_signature
+
+producer_signature_pending
+
+producer_signed
+
+shared_with_carrier
+
+carrier_integration_pending
+
+carrier_ready_to_sign
+
+carrier_signed
+
+in_transit
+
+destination_integration_pending
+
+destination_ready_to_sign
+
+destination_signed
+
+complete_copy_pending
+
+complete_copy_received
+
+data_transmission_pending
+
+transmitted
+
+conservation_pending
+
+conserved
+
+cancel_pending
+
+cancelled
+
+error
+
+Ogni transizione deve definire:
+
+stato di partenza
+
+stato di arrivo
+
+ruoli autorizzati
+
+campi obbligatori
+
+azioni server-side
+
+effetti sul registro
+
+eventi generati
+
+operazioni RENTRI collegate
+
+rollback ammesso o negato
+
+Non assumere che questi stati coincidano con i nomi ufficiali RENTRI.
+
+Realizza un mapper tra stato interno e stato restituito dalle API ufficiali.
+
+16. FLUSSO DI UN FIR
+
+16.1 Nuovo FIR
+
+L’utente seleziona:
+
+unità locale
+
+profilo rifiuto
+
+quantità
+
+trasportatore
+
+destinatario
+
+operazione prevista
+
+data di partenza
+
+eventuale intermediario
+
+Il sistema recupera:
+
+dati del produttore
+
+codice EER
+
+descrizione
+
+stato fisico
+
+caratteristiche di pericolo
+
+imballaggio
+
+dati ricorrenti del trasportatore
+
+dati ricorrenti del destinatario
+
+Il sistema esegue controlli locali.
+
+Il FIR resta draft finché non supera la validazione.
+
+16.2 Controlli prima della numerazione
+
+Controlla:
+
+unità locale attiva
+
+connessione RENTRI configurata
+
+registro coerente
+
+profilo rifiuto confermato
+
+quantità maggiore di zero
+
+unità di misura valorizzata
+
+trasportatore presente
+
+destinatario presente
+
+operazione presente
+
+autorizzazioni non scadute, quando configurate
+
+dati obbligatori RENTRI presenti
+
+assenza di un invio identico già in corso
+
+16.3 Numerazione o vidimazione
+
+Esegui l’operazione dal backend.
+
+Usa idempotency key.
+
+Registra richiesta e risposta.
+
+Non generare numeri ufficiali localmente salvo procedura espressamente ammessa dalla documentazione ufficiale.
+
+16.4 Firma del produttore
+
+Predisponi un’interfaccia SignatureProvider.
+
+Implementazioni:
+
+MockSignatureProvider
+
+RentriRemoteSignatureProvider
+
+ExternalEidasSignatureProvider come contratto non attivo
+
+Per la prima versione:
+
+integra il flusso ufficiale RENTRI quando documentazione e credenziali lo consentono
+
+altrimenti gestisci un handoff controllato verso il processo ufficiale
+
+mostra lo stato di attesa
+
+aggiorna lo stato tramite polling o callback
+
+non dichiarare firmato un documento senza prova valida
+
+16.5 Trasporto e destinazione
+
+Il produttore deve vedere:
+
+stato corrente
+
+ultima attività
+
+soggetto che deve agire
+
+data dell’ultima firma
+
+eventuali dati integrati
+
+eventuali errori
+
+Non permettere al produttore di firmare per un soggetto esterno.
+
+16.6 Copia completa
+
+Quando disponibile:
+
+scarica la copia completa
+
+calcola hash
+
+salvala in Storage
+
+collegala al FIR
+
+blocca la versione
+
+genera evento complete_copy_received
+
+avvia il collegamento allo scarico
+
+predisponi la trasmissione dati quando richiesta
+
+16.7 Collegamento al registro
+
+Il FIR chiuso deve generare o completare il movimento di scarico.
+
+L’utente deve vedere i carichi consumati.
+
+Supporta allocazione:
+
+automatica FIFO
+
+manuale
+
+mista
+
+L’allocazione automatica deve restare modificabile prima del blocco.
+
+17. INTEGRAZIONE RENTRI
+
+La documentazione ufficiale RENTRI è la fonte di verità.
+
+Prima di scrivere il client:
+
+analizza la documentazione API ufficiale
+
+analizza OpenAPI ufficiale, quando disponibile
+
+analizza gli schemi XSD ufficiali
+
+analizza il changelog
+
+analizza l’ambiente demo
+
+registra nel repository la data della documentazione consultata
+
+Non copiare endpoint da blog, tutorial commerciali o fonti non ufficiali.
+
+Non inventare campi.
+
+Non assumere che gli endpoint demo e produzione abbiano lo stesso comportamento senza verifica.
+
+17.1 Moduli del client
+
+Predisponi moduli separati:
+
+RentriAuthenticationClient
+
+RentriCodificationsClient
+
+RentriRegistersClient
+
+RentriMovementsClient
+
+RentriFirClient
+
+RentriDigitalFirClient
+
+RentriRemoteSignatureClient
+
+RentriValidationClient
+
+RentriHealthClient
+
+17.2 Interfaccia adapter
+
+Definisci RentriAdapter con metodi di dominio, non legati ai dettagli HTTP.
+
+Esempio concettuale:
+
+checkConnection
+
+syncCodifications
+
+openRegister
+
+validateRegisterPayload
+
+transmitRegisterEntries
+
+reserveOrAssignFirNumber
+
+validateFir
+
+createDigitalFir
+
+getDigitalFir
+
+updateDigitalFir
+
+uploadXfir
+
+downloadXfir
+
+requestProducerSignature
+
+getSignatureStatus
+
+downloadCompleteFirCopy
+
+returnCompleteFirCopy
+
+transmitFirData
+
+cancelFir
+
+rollbackLastSignature
+
+getOperationStatus
+
+Non implementare un metodo finché non esiste un corrispondente ufficiale verificato.
+
+Quando un metodo non risulta disponibile:
+
+implementa UnsupportedRentriOperationError
+
+documenta il limite
+
+mantieni il flusso applicativo coerente
+
+17.3 Generazione client
+
+Quando RENTRI pubblica una specifica OpenAPI valida:
+
+scaricala con script controllato
+
+salva una copia versionata in docs/rentri/specs
+
+calcola hash
+
+genera tipi e client
+
+non modificare a mano il codice generato
+
+racchiudi il client generato dietro un adapter scritto a mano
+
+17.4 Changelog
+
+Predisponi un comando:
+
+pnpm rentri:check-updates
+
+Il comando deve:
+
+recuperare il changelog ufficiale
+
+confrontare la versione nota
+
+segnalare differenze
+
+salvare un report
+
+non applicare cambiamenti automatici in produzione
+
+17.5 Ambienti
+
+Supporta:
+
+mock
+
+demo
+
+production
+
+Valore predefinito locale:
+
+mock
+
+Valore predefinito staging:
+
+demo
+
+La produzione richiede una variabile esplicita e un controllo di sicurezza.
+
+Impedisci l’avvio production quando:
+
+manca il certificato
+
+manca la configurazione
+
+l’ambiente Nhost è locale
+
+è presente un flag demo
+
+17.6 Timeout e retry
+
+Definisci timeout per ogni chiamata.
+
+Applica retry con backoff esponenziale e jitter per errori temporanei.
+
+Non ripetere automaticamente operazioni non idempotenti senza idempotency key o verifica dello stato remoto.
+
+Gestisci:
+
+timeout
+
+HTTP 429
+
+HTTP 5xx
+
+connessione interrotta
+
+risposta non valida
+
+certificato scaduto
+
+JWT rifiutato
+
+schema non compatibile
+
+manutenzione programmata
+
+17.7 Circuit breaker
+
+Aggiungi circuit breaker per RENTRI.
+
+Quando il servizio risulta indisponibile:
+
+non perdere le operazioni
+
+mettile in coda
+
+mostra “Invio in attesa”
+
+non mostrare “Invio completato”
+
+riprova secondo regole configurate
+
+consenti retry manuale a utenti autorizzati
+
+18. xFIR
+
+Tratta xFIR come documento versionato.
+
+Non considerarlo un semplice PDF.
+
+Predisponi:
+
+parser
+
+builder
+
+validatore XSD
+
+gestore versioni
+
+calcolo hash
+
+storage
+
+metadati delle firme
+
+supporto allegati
+
+Non implementare in proprio la firma XAdES.
+
+Conserva separati:
+
+modello di dominio FIR
+
+payload JSON delle API
+
+XML xFIR
+
+contenitore firmato
+
+copia completa
+
+Realizza mapper espliciti:
+
+DomainFirToRentriPayload
+
+RentriPayloadToDomainFir
+
+DomainFirToXfirXml
+
+XfirXmlToDomainFir
+
+Ogni mapper deve avere verifiche automatiche.
+
+Quando lo schema XSD cambia:
+
+mantieni la lettura delle versioni storiche
+
+non riscrivere i documenti esistenti
+
+seleziona il builder in base alla versione
+
+19. JOB E CODE
+
+Realizza una coda applicativa su PostgreSQL.
+
+Tabella integration_jobs:
+
+id
+
+organization_id
+
+job_type
+
+entity_type
+
+entity_id
+
+status
+
+priority
+
+payload JSONB
+
+idempotency_key
+
+attempt_count
+
+max_attempts
+
+next_attempt_at
+
+locked_at
+
+locked_by
+
+last_error_code
+
+last_error_message
+
+correlation_id
+
+created_at
+
+updated_at
+
+completed_at
+
+Stati:
+
+pending
+
+running
+
+retry_wait
+
+completed
+
+failed
+
+dead_letter
+
+cancelled
+
+Usa SELECT FOR UPDATE SKIP LOCKED.
+
+Il worker gira nel Run Service.
+
+Nhost Cron Trigger richiama il worker secondo intervallo configurato.
+
+Job iniziali:
+
+sync_rentri_codifications
+
+check_rentri_connection
+
+transmit_register_entries
+
+create_digital_fir
+
+poll_fir_status
+
+download_complete_fir_copy
+
+transmit_fir_data
+
+send_expiry_notifications
+
+generate_export
+
+prepare_conservation_batch
+
+verify_document_hashes
+
+cleanup_temporary_files
+
+Non affidarti a processi in memoria come unica fonte della coda.
+
+20. EVENTI DATABASE
+
+Usa Nhost Events per notificare il Run Service quando:
+
+una membership viene invitata
+
+un’autorizzazione si avvicina alla scadenza
+
+un FIR entra in stato pronto per invio
+
+un documento viene caricato
+
+un job entra in dead letter
+
+un abbonamento cambia stato
+
+Proteggi i webhook con NHOST_WEBHOOK_SECRET.
+
+Verifica firma o secret in ogni handler.
+
+Rendi gli handler idempotenti.
+
+21. AUDIT TRAIL
+
+Tabella audit_events append-only:
+
+id
+
+organization_id nullable
+
+actor_user_id nullable
+
+actor_type
+
+actor_reference
+
+action
+
+entity_type
+
+entity_id
+
+event_timestamp
+
+ip_address
+
+user_agent
+
+correlation_id
+
+request_id
+
+before_data JSONB
+
+after_data JSONB
+
+metadata JSONB
+
+previous_hash
+
+event_hash
+
+Aggiungi una catena hash per rilevare alterazioni.
+
+Non esporre before_data e after_data completi agli utenti ordinari.
+
+Oscura:
+
+credenziali
+
+token
+
+chiavi
+
+certificati privati
+
+password
+
+dati tecnici sensibili
+
+Eventi obbligatori:
+
+accesso
+
+cambio organizzazione
+
+invito utente
+
+cambio ruolo
+
+connessione RENTRI
+
+inserimento movimento
+
+modifica bozza
+
+blocco movimento
+
+rettifica
+
+numerazione FIR
+
+firma
+
+trasmissione
+
+ricezione copia completa
+
+download documento legale
+
+cambio configurazione
+
+rotazione credenziale
+
+22. HASURA PERMISSIONS
+
+Genera metadata Hasura completi.
+
+Il ruolo user deve vedere una riga quando esiste una membership attiva nella relativa organization.
+
+Costruisci relazioni:
+
+entity.organization
+
+organization.memberships
+
+membership.user
+
+Per le letture usa condizioni basate su:
+
+organization.memberships.user_id uguale a X-Hasura-User-Id
+
+organization.memberships.status uguale active
+
+Per i clienti collegati a un partner, richiedi anche un partner_client_relationship attivo con permessi adatti.
+
+Non concedere insert, update o delete diretti su:
+
+registers aperti
+
+register_entries locked
+
+firs dopo la numerazione
+
+fir_versions
+
+fir_signatures
+
+fir_events
+
+fir_submissions
+
+encrypted_credentials
+
+audit_events
+
+integration_jobs
+
+rentri_connections sensibili
+
+Queste operazioni passano dal Run Service.
+
+Concedi mutation dirette limitate su:
+
+preferenze utente
+
+bozze non ufficiali
+
+anagrafiche non sensibili
+
+impostazioni visive
+
+Usa column permissions.
+
+Nascondi:
+
+encrypted_payload
+
+secrets
+
+raw token
+
+request headers sensibili
+
+response headers sensibili
+
+23. AUTORIZZAZIONE SERVER-SIDE
+
+Ogni chiamata al Run Service deve:
+
+leggere Bearer token
+
+verificare il JWT Nhost
+
+estrarre user ID
+
+caricare membership
+
+controllare organization ID
+
+controllare ruolo
+
+controllare stato dell’organizzazione
+
+controllare stato dell’abbonamento quando necessario
+
+registrare correlation ID
+
+Non fidarti di organization_id senza verifica.
+
+Non fidarti del ruolo inviato dal browser.
+
+Predisponi policy centralizzate:
+
+canReadOrganization
+
+canManageOrganization
+
+canManageMembers
+
+canManageWasteProfiles
+
+canManageParties
+
+canCreateMovements
+
+canLockMovements
+
+canCreateFir
+
+canSubmitFir
+
+canManageRentriConnection
+
+canReadAudit
+
+canManageBilling
+
+canActAsPartner
+
+24. AUTENTICAZIONE
+
+Implementa:
+
+registrazione e-mail e password
+
+verifica e-mail
+
+accesso
+
+uscita
+
+recupero password
+
+refresh sessione
+
+MFA TOTP
+
+gestione sessione scaduta
+
+protezione delle rotte
+
+Inviti:
+
+un owner o admin invita un utente
+
+il sistema genera organization_membership pending
+
+invia e-mail
+
+l’utente accetta
+
+la membership diventa active
+
+MFA obbligatoria per:
+
+owner
+
+admin
+
+environmental_manager
+
+consultant
+
+partner_admin
+
+platform_admin
+
+Consenti WebAuthn come opzione futura o secondaria.
+
+25. ONBOARDING
+
+Realizza un onboarding salvabile e riprendibile.
+
+Passaggi:
+
+1. Dati aziendali
+
+2. Unità locale
+
+3. Tipo di attività
+
+4. Iscrizione e riferimenti RENTRI
+
+5. Connessione interoperabilità
+
+6. Registro
+
+7. Rifiuti ricorrenti
+
+8. Trasportatori e destinatari
+
+9. Autorizzazioni
+
+10. Utenti
+
+11. Verifica finale
+
+12. Modalità demo o attivazione
+
+Ogni passaggio deve avere:
+
+stato
+
+data completamento
+
+utente che lo ha completato
+
+errori
+
+azione successiva
+
+Tabella onboarding_steps:
+
+id
+
+organization_id
+
+step_code
+
+status
+
+data JSONB
+
+completed_by
+
+completed_at
+
+created_at
+
+updated_at
+
+Dashboard onboarding:
+
+percentuale completata
+
+passaggi bloccanti
+
+passaggi consigliati
+
+collegamento diretto alla correzione
+
+26. TEMPLATE VERTICALI PER OFFICINE
+
+Predisponi template configurabili:
+
+officina meccanica
+
+carrozzeria
+
+elettrauto
+
+gommista
+
+centro revisione con riparazione
+
+officina veicoli industriali
+
+Ogni template propone:
+
+categorie di rifiuto
+
+campi tipici
+
+frequenze indicative
+
+documenti richiesti internamente
+
+controlli applicabili
+
+Non confermare codici EER in modo automatico.
+
+Salva i template come dati, non come logica hardcoded.
+
+Il consulente riesce a modificare i template.
+
+27. DASHBOARD
+
+La dashboard deve mostrare dati reali.
+
+Sezioni:
+
+azioni da completare
+
+FIR in corso
+
+FIR in errore
+
+movimenti da registrare
+
+movimenti non trasmessi
+
+giacenze per rifiuto
+
+autorizzazioni in scadenza
+
+stato connessione RENTRI
+
+ultime attività
+
+documenti da conservare
+
+onboarding incompleto
+
+KPI:
+
+FIR del mese
+
+movimenti del mese
+
+quantità caricate
+
+quantità scaricate
+
+numero anomalie
+
+numero invii in attesa
+
+tempo medio dalla bozza alla chiusura
+
+Non inserire grafici decorativi.
+
+Ogni dato deve portare alla lista filtrata corrispondente.
+
+28. PAGINE FRONTEND
+
+Realizza queste route.
+
+Autenticazione:
+
+/login
+
+/register
+
+/verify-email
+
+/forgot-password
+
+/reset-password
+
+/mfa
+
+Applicazione:
+
+/app
+
+/app/onboarding
+
+/app/dashboard
+
+/app/registers
+
+/app/registers/:registerId
+
+/app/movements
+
+/app/movements/new
+
+/app/movements/:movementId
+
+/app/firs
+
+/app/firs/new
+
+/app/firs/:firId
+
+/app/waste-profiles
+
+/app/waste-profiles/new
+
+/app/waste-profiles/:id
+
+/app/parties
+
+/app/parties/:id
+
+/app/authorizations
+
+/app/documents
+
+/app/alerts
+
+/app/audit
+
+/app/team
+
+/app/rentri-connection
+
+/app/settings
+
+/app/billing
+
+Partner:
+
+/partner
+
+/partner/clients
+
+/partner/clients/:organizationId
+
+/partner/alerts
+
+/partner/templates
+
+Amministrazione:
+
+/admin
+
+/admin/organizations
+
+/admin/users
+
+/admin/jobs
+
+/admin/integrations
+
+/admin/subscriptions
+
+/admin/feature-flags
+
+/admin/audit
+
+29. TABELLE E FILTRI
+
+Le liste devono supportare:
+
+ricerca
+
+ordinamento
+
+filtri
+
+paginazione server-side
+
+colonne selezionabili
+
+esportazione
+
+salvataggio delle viste
+
+Filtri FIR:
+
+stato
+
+unità locale
+
+profilo rifiuto
+
+trasportatore
+
+destinatario
+
+data
+
+errori
+
+stato firma
+
+stato trasmissione
+
+Filtri movimenti:
+
+registro
+
+tipo
+
+codice EER
+
+profilo rifiuto
+
+stato
+
+data operazione
+
+data registrazione
+
+trasmesso o non trasmesso
+
+30. FORM
+
+Tutti i form devono:
+
+avere validazione client Zod
+
+avere validazione server indipendente
+
+mostrare errori accanto ai campi
+
+non perdere dati in caso di errore
+
+avvisare prima di uscire da una bozza modificata
+
+impedire doppi invii
+
+supportare salvataggio bozza
+
+mostrare i campi obbligatori
+
+registrare l’ultima modifica
+
+Le combobox devono supportare ricerca da tastiera.
+
+I codici devono mostrare codice e descrizione.
+
+31. RICERCA GLOBALE
+
+Aggiungi una ricerca globale per:
+
+numero FIR
+
+numero interno
+
+codice EER
+
+nome rifiuto
+
+trasportatore
+
+destinatario
+
+numero autorizzazione
+
+nome documento
+
+numero movimento
+
+La ricerca deve rispettare i permessi tenant.
+
+Non inviare dati a servizi esterni.
+
+32. IMPORTAZIONE DATI
+
+Realizza importazione guidata CSV e XLSX per:
+
+profili rifiuto
+
+soggetti
+
+autorizzazioni
+
+movimenti storici
+
+FIR storici
+
+Flusso:
+
+upload file
+
+analisi colonne
+
+mappatura
+
+anteprima
+
+validazione
+
+elenco errori
+
+conferma
+
+job asincrono
+
+report finale
+
+Non importare righe invalide senza indicazione.
+
+Consenti:
+
+importa righe valide e scarta le altre
+
+blocca tutto se esiste almeno un errore
+
+Conserva il file originale e il report.
+
+33. ESPORTAZIONE
+
+Esportazioni:
+
+CSV movimenti
+
+XLSX movimenti
+
+PDF riepilogativo non ufficiale
+
+documenti originali
+
+pacchetto ZIP per periodo
+
+report giacenze
+
+report anomalie
+
+registro per conservazione
+
+Ogni export deve:
+
+essere generato dal backend
+
+rispettare i permessi
+
+registrare audit
+
+avere scadenza
+
+essere scaricato tramite URL firmato
+
+34. NOTIFICHE
+
+Tabella notifications:
+
+id
+
+organization_id
+
+user_id nullable
+
+type
+
+severity
+
+title
+
+message
+
+entity_type
+
+entity_id
+
+read_at
+
+dismissed_at
+
+created_at
+
+Tabella notification_preferences:
+
+user_id
+
+organization_id
+
+channel
+
+event_type
+
+enabled
+
+digest_mode
+
+Canali iniziali:
+
+in-app
+
+e-mail
+
+Eventi:
+
+autorizzazione in scadenza
+
+connessione RENTRI fallita
+
+FIR in attesa di azione
+
+FIR in errore
+
+copia completa ricevuta
+
+movimenti da trasmettere
+
+job fallito
+
+certificato in scadenza
+
+abbonamento in scadenza
+
+Non inviare notifiche duplicate.
+
+35. E-MAIL
+
+Predisponi template italiani per:
+
+verifica account
+
+recupero password
+
+invito aziendale
+
+invito partner
+
+FIR che richiede azione
+
+errore RENTRI
+
+autorizzazione in scadenza
+
+certificato in scadenza
+
+riepilogo settimanale
+
+pagamento fallito
+
+Non inserire stile grafico di brand.
+
+36. ABBONAMENTI
+
+Predisponi un modulo billing separato.
+
+Piani iniziali:
+
+officina
+
+officina_pro
+
+carrozzeria
+
+partner
+
+Tabella plans:
+
+id
+
+code
+
+name
+
+monthly_price
+
+annual_price
+
+included_local_units
+
+included_users
+
+included_movements
+
+included_firs
+
+included_storage_bytes
+
+features JSONB
+
+active
+
+Tabella subscriptions:
+
+id
+
+organization_id
+
+plan_id
+
+provider
+
+provider_customer_id
+
+provider_subscription_id
+
+status
+
+billing_interval
+
+current_period_start
+
+current_period_end
+
+cancel_at_period_end
+
+trial_ends_at
+
+created_at
+
+updated_at
+
+Tabella usage_counters:
+
+organization_id
+
+period_start
+
+period_end
+
+movement_count
+
+fir_count
+
+storage_bytes
+
+active_users
+
+last_calculated_at
+
+Definisci BillingProvider.
+
+Fornisci:
+
+MockBillingProvider
+
+StripeBillingProvider predisposto ma attivato tramite variabili
+
+Non bloccare l’accesso ai documenti legali quando un pagamento fallisce.
+
+Blocca nuove operazioni a pagamento dopo un periodo configurabile.
+
+37. PIANO PARTNER
+
+Il partner deve vedere:
+
+clienti collegati
+
+stato onboarding
+
+errori
+
+autorizzazioni in scadenza
+
+FIR bloccati
+
+connessioni RENTRI
+
+utenti del cliente, entro i permessi concessi
+
+Il partner non deve vedere dati di clienti non collegati.
+
+Il cliente deve revocare l’accesso.
+
+Registra ogni accesso del partner.
+
+Il partner riesce a predisporre template.
+
+Il cliente deve confermare le classificazioni.
+
+38. AMMINISTRAZIONE SAAS
+
+Il platform_admin deve gestire:
+
+organizzazioni
+
+utenti
+
+piani
+
+abbonamenti
+
+job
+
+dead letter
+
+stato integrazione
+
+feature flag
+
+template verticali
+
+codifiche
+
+ticket
+
+audit tecnico
+
+Non mostrare chiavi private o secret in chiaro.
+
+Aggiungi impersonation controllata.
+
+L’impersonation richiede:
+
+MFA
+
+motivazione
+
+durata limitata
+
+banner visibile
+
+audit completo
+
+nessuna modifica alle credenziali
+
+39. ERRORI
+
+Definisci una gerarchia errori.
+
+DomainError
+
+ValidationError
+
+AuthorizationError
+
+AuthenticationError
+
+ConflictError
+
+NotFoundError
+
+ExternalServiceError
+
+RentriError
+
+RentriAuthenticationError
+
+RentriValidationError
+
+RentriUnavailableError
+
+RentriSchemaMismatchError
+
+CertificateExpiredError
+
+UnsupportedRentriOperationError
+
+IdempotencyConflictError
+
+Ogni risposta di errore deve avere:
+
+code
+
+message italiano
+
+technical_message non mostrato all’utente
+
+correlation_id
+
+field_errors quando presenti
+
+retryable
+
+suggested_action
+
+Non mostrare stack trace in produzione.
+
+40. IDEMPOTENZA
+
+Tabella idempotency_records:
+
+id
+
+organization_id
+
+scope
+
+idempotency_key
+
+request_hash
+
+status
+
+response_code
+
+response_body JSONB
+
+entity_type
+
+entity_id
+
+expires_at
+
+created_at
+
+updated_at
+
+Usa idempotenza per:
+
+numerazione FIR
+
+trasmissione movimenti
+
+invio FIR
+
+firma richiesta
+
+download e registrazione copia completa
+
+billing webhook
+
+importazioni
+
+Il secondo invio con stessa chiave e payload uguale deve restituire il risultato precedente.
+
+Payload diverso con stessa chiave deve generare conflitto.
+
+41. CONCORRENZA E TRANSAZIONI
+
+Gestisci aggiornamenti concorrenti con optimistic locking.
+
+Aggiungi version integer alle entità modificabili.
+
+Ogni modifica deve indicare la versione attesa.
+
+In caso di mismatch restituisci ConflictError.
+
+Usa transazioni per:
+
+blocco movimento
+
+generazione scarico da FIR
+
+transizione di stato FIR
+
+salvataggio risposta RENTRI
+
+generazione evento audit
+
+aggiornamento contatori
+
+42. SICUREZZA
+
+Non inserire secret nel repository.
+
+Non stampare token nei log.
+
+Non conservare password applicative.
+
+Cifra i dati sensibili applicativi.
+
+Imposta Content Security Policy.
+
+Imposta secure headers.
+
+Proteggi da CSRF gli endpoint basati su cookie.
+
+Usa Bearer token per API.
+
+Limita CORS ai domini configurati.
+
+Imposta rate limiting su:
+
+login
+
+inviti
+
+upload
+
+endpoint RENTRI
+
+export
+
+ricerca
+
+Imposta limiti dimensione file.
+
+Controlla MIME type e firma del file.
+
+Rinomina i file sullo storage con identificativi interni.
+
+Blocca path traversal.
+
+Sanifica i nomi originali.
+
+43. GDPR
+
+Predisponi:
+
+informativa versionata
+
+accettazione termini
+
+registro consensi quando necessario
+
+export dati azienda
+
+export dati utente
+
+revoca accessi
+
+chiusura organizzazione
+
+politiche di conservazione
+
+pseudonimizzazione dei log
+
+riduzione dei dati personali
+
+Non cancellare documenti che devono restare conservati.
+
+Separa:
+
+chiusura account
+
+revoca accesso
+
+cancellazione dati personali
+
+conservazione obbligatoria di documenti aziendali
+
+44. BACKUP E INTEGRITÀ
+
+Documenta:
+
+backup Nhost
+
+ripristino
+
+esportazione periodica
+
+verifica hash documenti
+
+recovery point objective
+
+recovery time objective
+
+Aggiungi job periodico che verifica hash dei documenti critici.
+
+Segnala file mancanti o alterati.
+
+45. CONSERVAZIONE DIGITALE
+
+Non realizzare un conservatore a norma interno.
+
+Predisponi ConservationProvider.
+
+Implementazioni:
+
+MockConservationProvider
+
+ExternalConservationProvider interface
+
+Flusso:
+
+selezione documenti
+
+generazione pacchetto
+
+invio al provider
+
+ricezione presa in carico
+
+ricezione esito
+
+salvataggio ricevuta
+
+blocco legale
+
+avviso in caso di errore
+
+Tabella conservation_batches:
+
+id
+
+organization_id
+
+provider
+
+status
+
+period_start
+
+period_end
+
+document_count
+
+package_document_id
+
+receipt_document_id
+
+provider_reference
+
+submitted_at
+
+completed_at
+
+error_message
+
+created_at
+
+updated_at
+
+46. OSSERVABILITÀ
+
+Aggiungi:
+
+log JSON
+
+correlation ID
+
+request ID
+
+metriche applicative
+
+health endpoint
+
+readiness endpoint
+
+liveness endpoint
+
+metriche RENTRI
+
+metriche job
+
+metriche GraphQL rilevanti
+
+Non inserire dati personali nei log salvo necessità.
+
+Metriche:
+
+durata chiamate RENTRI
+
+percentuale errori
+
+numero retry
+
+job in attesa
+
+job dead letter
+
+FIR per stato
+
+movimenti non trasmessi
+
+tempo medio di chiusura FIR
+
+errori per versione schema
+
+47. FEATURE FLAG
+
+Tabella feature_flags:
+
+id
+
+code
+
+description
+
+enabled_globally
+
+configuration JSONB
+
+created_at
+
+updated_at
+
+Tabella organization_feature_flags:
+
+organization_id
+
+feature_flag_id
+
+enabled
+
+configuration JSONB
+
+Feature iniziali:
+
+rentri_demo_integration
+
+rentri_production_integration
+
+remote_signature
+
+partner_portal
+
+billing
+
+conservation
+
+advanced_anomalies
+
+web_authn
+
+48. MODALITÀ DEMO
+
+Realizza una modalità demo completa.
+
+L’utente demo deve:
+
+entrare senza credenziali RENTRI
+
+vedere dati simulati
+
+generare movimenti
+
+predisporre FIR
+
+simulare firme
+
+simulare copia completa
+
+simulare errori
+
+La modalità demo deve mostrare chiaramente che non invia dati ufficiali.
+
+Non mescolare dati demo e dati reali.
+
+49. DATI DIMOSTRATIVI
+
+Genera seed per:
+
+una officina demo
+
+una carrozzeria demo
+
+un partner consulente
+
+due unità locali
+
+utenti con ruoli diversi
+
+profili rifiuto non ufficialmente confermati
+
+trasportatori
+
+destinatari
+
+autorizzazioni
+
+movimenti
+
+FIR in vari stati
+
+errori simulati
+
+notifiche
+
+abbonamenti
+
+I dati devono risultare fittizi.
+
+Non usare partite IVA o codici fiscali reali.
+
+50. VERIFICHE AUTOMATICHE
+
+Predisponi verifiche unitare per:
+
+calcolo giacenze
+
+allocazione FIFO
+
+macchina a stati FIR
+
+idempotenza
+
+permessi di dominio
+
+mapper RENTRI
+
+validazione Zod
+
+cifratura e decifratura
+
+calcolo hash
+
+retry
+
+circuit breaker
+
+Predisponi verifiche di integrazione per:
+
+Nhost Auth
+
+Hasura permissions
+
+Storage permissions
+
+Run Service
+
+database transactions
+
+event trigger
+
+cron job
+
+mock RENTRI
+
+Predisponi verifiche end-to-end per:
+
+registrazione
+
+onboarding
+
+inserimento carico
+
+generazione scarico
+
+nuovo FIR
+
+firma simulata
+
+ricezione copia completa simulata
+
+invito utente
+
+accesso consulente
+
+revoca consulente
+
+errore RENTRI e retry
+
+Verifica espressamente che:
+
+un cliente non legga i dati di un altro cliente
+
+un partner non legga clienti non assegnati
+
+un viewer non modifichi dati
+
+un documento locked non venga sostituito
+
+un FIR firmato non venga modificato direttamente
+
+l’admin secret non compaia nel bundle frontend
+
+51. ACCESSIBILITÀ
+
+Garantisci:
+
+label associate ai campi
+
+focus visibile
+
+navigazione da tastiera
+
+dialog con focus trap
+
+messaggi di errore accessibili
+
+tabelle leggibili da screen reader
+
+uso corretto di heading
+
+contrasto demandato al futuro tema ma struttura pronta
+
+nessuna funzione essenziale legata al solo mouse
+
+52. PRESTAZIONI
+
+Usa paginazione server-side.
+
+Evita query GraphQL N+1.
+
+Aggiungi indici.
+
+Evita di scaricare documenti nelle liste.
+
+Carica i dettagli on demand.
+
+Usa query persistenti o allow list in produzione, se adatta alla configurazione Nhost.
+
+Imposta limiti di profondità e complessità GraphQL.
+
+Non inviare raw payload RENTRI al frontend salvo necessità amministrativa.
+
+53. Nhost CONFIGURATION
+
+Predisponi nhost.toml.
+
+Configura:
+
+Auth
+
+MFA TOTP
+
+email verification
+
+client URL
+
+allowed redirect URL
+
+Hasura
+
+Storage
+
+Functions
+
+rate limit
+
+Run Service
+
+environment variables
+
+secrets placeholder
+
+Configura sviluppo locale con:
+
+PostgreSQL
+
+Hasura
+
+Auth
+
+Storage locale
+
+Mailhog
+
+Functions
+
+Run Service locale
+
+Il comando di avvio deve essere documentato.
+
+54. VARIABILI DI AMBIENTE
+
+Predisponi .env.example con almeno:
+
+APP_ENV
+
+APP_BASE_URL
+
+VITE_NHOST_SUBDOMAIN
+
+VITE_NHOST_REGION
+
+NHOST_SUBDOMAIN
+
+NHOST_REGION
+
+NHOST_ADMIN_SECRET
+
+NHOST_WEBHOOK_SECRET
+
+RENTRI_ENVIRONMENT
+
+RENTRI_API_BASE_URL
+
+RENTRI_CODIFICATIONS_BASE_URL
+
+RENTRI_API_TIMEOUT_MS
+
+RENTRI_API_MAX_RETRIES
+
+RENTRI_KNOWN_CHANGELOG_VERSION
+
+RENTRI_INTEROPERABILITY_CERTIFICATE_REF
+
+CREDENTIAL_MASTER_KEY
+
+FIELD_ENCRYPTION_VERSION
+
+DOCUMENT_MAX_SIZE_MB
+
+SIGNED_URL_TTL_SECONDS
+
+CONSERVATION_PROVIDER
+
+BILLING_PROVIDER
+
+STRIPE_SECRET_KEY
+
+STRIPE_WEBHOOK_SECRET
+
+SMTP_FROM
+
+SUPPORT_EMAIL
+
+LOG_LEVEL
+
+Non inserire valori reali.
+
+55. SCRIPT
+
+Predisponi script pnpm:
+
+dev
+
+dev:web
+
+dev:bridge
+
+build
+
+lint
+
+typecheck
+
+verify
+
+verify:unit
+
+verify:integration
+
+verify:e2e
+
+db:migrate
+
+db:seed
+
+graphql:codegen
+
+rentri:sync-codifications
+
+rentri:check-updates
+
+rentri:validate-fixtures
+
+documents:verify-hashes
+
+jobs:run-once
+
+jobs:retry-dead-letter
+
+56. CI
+
+GitHub Actions deve eseguire:
+
+installazione pnpm
+
+lint
+
+typecheck
+
+verifiche unitare
+
+build
+
+verifiche di migrazione
+
+controllo metadata Hasura
+
+controllo secret accidentali
+
+dependency audit
+
+verifiche end-to-end su pull request, quando sostenibile
+
+Non distribuire automaticamente in produzione da pull request.
+
+Prevedi ambienti:
+
+local
+
+staging
+
+production
+
+57. DOCUMENTAZIONE
+
+README deve spiegare:
+
+cosa fa il prodotto
+
+architettura
+
+requisiti
+
+avvio locale
+
+Nhost setup
+
+migrazioni
+
+seed
+
+Run Service
+
+modalità mock RENTRI
+
+modalità demo RENTRI
+
+variabili
+
+verifiche
+
+build
+
+distribuzione
+
+La cartella docs deve contenere:
+
+architecture/system-overview.md
+
+architecture/data-flow.md
+
+architecture/tenancy.md
+
+database/schema.md
+
+database/state-machines.md
+
+permissions/hasura-permissions.md
+
+permissions/application-roles.md
+
+rentri/integration-overview.md
+
+rentri/official-sources-reviewed.md
+
+rentri/adapter-contract.md
+
+rentri/certificate-management.md
+
+rentri/demo-to-production-checklist.md
+
+operations/runbook.md
+
+operations/degraded-mode.md
+
+operations/job-recovery.md
+
+security/threat-model.md
+
+security/data-classification.md
+
+security/credential-handling.md
+
+decisions/ADR files
+
+58. THREAT MODEL
+
+Documenta minacce e contromisure per:
+
+accesso tra tenant
+
+furto token
+
+admin secret esposto
+
+certificato RENTRI sottratto
+
+documenti alterati
+
+doppio invio
+
+FIR modificato dopo firma
+
+utente partner troppo autorizzato
+
+upload malevolo
+
+webhook falso
+
+replay request
+
+log con dati sensibili
+
+dipendenza RENTRI indisponibile
+
+schema RENTRI cambiato
+
+errore di mapping
+
+59. CRITERI DI ACCETTAZIONE FUNZIONALI
+
+La piattaforma è accettabile quando:
+
+un utente apre un account
+
+verifica la mail
+
+attiva MFA
+
+genera una organizzazione
+
+inserisce una unità locale
+
+completa l’onboarding
+
+configura profili rifiuto
+
+inserisce trasportatore e destinatario
+
+registra un carico
+
+vede la giacenza aggiornata
+
+predispone un FIR
+
+supera i controlli
+
+esegue il flusso mock RENTRI
+
+simula la firma del produttore
+
+simula trasporto e destinazione
+
+riceve la copia completa simulata
+
+genera lo scarico
+
+vede la giacenza ridotta
+
+trova i documenti
+
+vede l’audit trail
+
+esporta i movimenti
+
+60. CRITERI DI ACCETTAZIONE TECNICI
+
+Il repository è accettabile quando:
+
+pnpm install termina senza errore
+
+pnpm build termina senza errore
+
+pnpm typecheck termina senza errore
+
+pnpm lint termina senza errore
+
+pnpm verify termina senza errore
+
+nhost up avvia il backend locale
+
+le migrazioni partono da database vuoto
+
+i seed vengono applicati
+
+GraphQL Codegen genera i tipi
+
+il frontend non contiene secret
+
+i permessi tenant superano le verifiche
+
+il Run Service supera health e readiness
+
+la modalità mock funziona senza RENTRI
+
+la modalità production resta bloccata senza configurazione valida
+
+61. ORDINE DI ESECUZIONE
+
+Lavora in questo ordine.
+
+Fase 1:
+
+inizializza monorepo
+
+configura pnpm
+
+configura Nhost locale
+
+configura frontend
+
+configura Run Service
+
+configura CI
+
+Fase 2:
+
+genera modello dati
+
+genera migrazioni
+
+genera relazioni Hasura
+
+genera permessi
+
+genera seed
+
+Fase 3:
+
+implementa Auth
+
+implementa organizzazioni
+
+implementa membership
+
+implementa selezione organizzazione
+
+implementa onboarding
+
+Fase 4:
+
+implementa codifiche
+
+implementa profili rifiuto
+
+implementa soggetti
+
+implementa autorizzazioni
+
+Fase 5:
+
+implementa registri
+
+implementa movimenti
+
+implementa giacenze
+
+implementa rettifiche
+
+Fase 6:
+
+implementa FIR
+
+implementa macchina a stati
+
+implementa versioni
+
+implementa documenti
+
+implementa audit
+
+Fase 7:
+
+implementa RentriAdapter
+
+implementa MockRentriAdapter
+
+implementa client demo basato sulle specifiche ufficiali disponibili
+
+implementa job e retry
+
+Fase 8:
+
+implementa notifiche
+
+implementa partner portal
+
+implementa billing mock
+
+implementa conservazione mock
+
+Fase 9:
+
+completa verifiche
+
+completa sicurezza
+
+completa documentazione
+
+completa checklist produzione
+
+62. REGOLE PER L’INTEGRAZIONE REALE
+
+Prima di attivare RentriProductionAdapter devi verificare:
+
+accreditamento richiesto
+
+certificato di interoperabilità
+
+tipo di certificato
+
+ambiente
+
+operator reference
+
+unit reference
+
+boarding
+
+firma remota
+
+OpenAPI
+
+XSD
+
+changelog
+
+limiti
+
+manutenzioni
+
+supporto tecnico
+
+Non marcare l’adapter come production-ready finché mancano verifiche reali in demo.
+
+Inserisci nel codice una capability matrix.
+
+Esempio:
+
+codifications_sync
+
+register_opening
+
+movement_transmission
+
+fir_numbering
+
+digital_fir_creation
+
+xfir_upload
+
+remote_signature
+
+complete_copy_download
+
+fir_data_transmission
+
+fir_cancellation
+
+rollback_signature
+
+Ogni capability ha:
+
+supported
+
+unsupported
+
+mock_only
+
+demo_verified
+
+production_verified
+
+last_verified_at
+
+documentation_version
+
+63. OUTPUT RICHIESTO DA CODEX
+
+Non fermarti alla descrizione.
+
+Lavora direttamente sui file.
+
+Al termine:
+
+mostra l’albero del repository
+
+riassumi le parti implementate
+
+indica i comandi di avvio
+
+indica gli account demo
+
+indica le funzioni ancora legate a credenziali esterne
+
+indica dove inserire le credenziali Nhost
+
+indica dove inserire certificati e parametri RENTRI
+
+indica come passare da mock a demo
+
+indica come passare da demo a produzione
+
+indica i rischi residui
+
+indica lo stato di ogni capability RENTRI
+
+Aggiorna IMPLEMENTATION_STATUS.md durante il lavoro.
+
+Non dichiarare completata una funzione che contiene placeholder.
+
+Usa una delle seguenti etichette:
+
+implemented
+
+implemented_with_mock
+
+blocked_by_credentials
+
+blocked_by_official_specification
+
+not_started
+
+64. PRIMA ATTIVITÀ DA ESEGUIRE
+
+Prima di generare il codice:
+
+ispeziona il repository esistente
+
+non sovrascrivere file utili senza motivo
+
+leggi eventuali AGENTS.md
+
+leggi package.json
+
+leggi configurazione Nhost
+
+leggi documentazione presente
+
+scrivi un breve piano in IMPLEMENTATION_STATUS.md
+
+poi inizia subito l’implementazione
+
+Non limitarti a restituire il piano nella chat.
+
+Genera la piattaforma.

@@ -1,0 +1,35 @@
+{
+  "name": "@rentridesk/rentri-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@fastify/cors": "latest",
+    "@fastify/helmet": "latest",
+    "@fastify/rate-limit": "latest",
+    "@fastify/swagger": "latest",
+    "@fastify/swagger-ui": "latest",
+    "@rentridesk/contracts": "workspace:*",
+    "@rentridesk/domain": "workspace:*",
+    "fast-xml-parser": "latest",
+    "fastify": "latest",
+    "jose": "latest",
+    "nodemailer": "^9.0.3",
+    "pg": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/nodemailer": "^8.0.1",
+    "@types/pg": "latest",
+    "tsx": "latest",
+    "typescript": "6.0.3",
+    "vitest": "latest"
+  }
+}
