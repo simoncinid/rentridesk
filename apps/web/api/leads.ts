@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequest, VercelResponse } from './vercel.js';
 import { z } from 'zod';
 import { sendLeadNotificationEmail } from '../lib/lead-mail.js';
 

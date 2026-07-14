@@ -30,7 +30,6 @@
     "@types/nodemailer": "^8.0.1",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "@vercel/node": "^5.8.23",
     "@vitejs/plugin-react": "latest",
     "typescript": "6.0.3",
     "vite": "latest"
