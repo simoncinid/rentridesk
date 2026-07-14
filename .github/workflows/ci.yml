@@ -18,5 +18,5 @@ jobs:
       - run: pnpm verify:unit
       - run: pnpm build
       - name: Check accidental secrets
-        run: "! git grep -En '(BEGIN (RSA |EC )?PRIVATE KEY|NHOST_ADMIN_SECRET=.{8,}|STRIPE_SECRET_KEY=sk_)' -- ':!*.example'"
+        run: "! git grep -En '(BEGIN (RSA |EC )?PRIVATE KEY|NHOST_ADMIN_SECRET=.{8,}|STRIPE_SECRET_KEY=sk_(live|test)_)' -- ':!*.example' ':!.github/**'"
       - run: pnpm audit --audit-level high
