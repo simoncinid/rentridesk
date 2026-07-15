@@ -27,6 +27,7 @@ for (const route of routes) {
     SoftwareApplication: html.includes('"@type":"SoftwareApplication"'),
     BreadcrumbList: html.includes('"@type":"BreadcrumbList"'),
     OpenGraph: html.includes('property="og:image"'),
+    favicon: html.includes('rel="icon" href="/favicon.ico"'),
   };
   for (const [name, valid] of Object.entries(checks)) {
     if (!valid) failures.push(`${route}: ${name}`);
