@@ -17,6 +17,7 @@
     "@rentridesk/contracts": "workspace:*",
     "@tanstack/react-query": "latest",
     "@tanstack/react-table": "latest",
+    "@vercel/analytics": "^2.0.1",
     "date-fns": "latest",
     "lucide-react": "latest",
     "nodemailer": "^9.0.3",

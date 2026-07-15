@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react';
 import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage.js';
@@ -53,6 +54,8 @@ function ScrollToRoute() {
 
 export function App() {
   return (
+    <>
+      <Analytics />
     <Suspense fallback={<div className="route-loading" aria-label="Caricamento" />}>
       <ScrollToRoute />
       <Routes>
@@ -192,5 +195,6 @@ export function App() {
       />
       </Routes>
     </Suspense>
+    </>
   );
 }
