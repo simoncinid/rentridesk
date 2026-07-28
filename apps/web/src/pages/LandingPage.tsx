@@ -601,6 +601,10 @@ export function LandingPage() {
             <div className="compact-paths-heading" data-reveal>
               <span className="landing-kicker">Guide e approfondimenti</span>
               <h2>Vai dritto all’informazione che ti serve.</h2>
+              <p>
+                Se ti serve anche stimare quantità e fabbisogni di cantiere, puoi consultare i{' '}
+                <a href="https://www.buildcalclab.com/">construction material calculators</a>.
+              </p>
             </div>
             <div className="compact-paths">
               <Link to="/obbligo-rentri-officine" data-reveal>
